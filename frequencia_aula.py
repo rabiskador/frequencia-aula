@@ -1,89 +1,107 @@
+
 '''
 DESAFIO 4 — PROJEÇÃO DE FREQUÊNCIA
 
-Crie um sistema que analise a frequência do aluno e calcule
-quantas aulas consecutivas ele precisa frequentar para atingir
-75% de frequência.
-
-O sistema também deve calcular quantas semanas e meses serão
-necessários para alcançar essa meta.
+Calcula uma estimativa de quantas aulas consecutivas
+o aluno precisa frequentar para atingir 75% de frequência.
 '''
+
+import math
+
+FATOR_FALTA = 1.25
+FREQUENCIA_MINIMA = 75
 
 print("=" * 55)
 print("       SISTEMA DE PROJEÇÃO DE FREQUÊNCIA")
 print("=" * 55)
 print()
-print("Este sistema calcula sua frequência atual e, caso esteja")
-print("abaixo de 75%, informa quantas aulas você precisa")
-print("frequentar para atingir a frequência mínima.")
-print()
-print("INFORME OS DADOS DA MATÉRIA:")
+print("Informe os dados disponíveis no sistema da ETEC.")
 print("-" * 55)
 
-nome_materia = input("Nome da matéria: ")
-quantidade_aulas = int(input("Quantidade de aulas dadas: "))
-quantidade_faltas = float(input("Quantidade de faltas: "))
+nome_materia = input("Nome da matéria: ").strip()
 
-quantidade_presencas = quantidade_aulas - quantidade_faltas
-frequencia = (quantidade_presencas / quantidade_aulas) * 100
-
-freq_aumento = (3 * quantidade_faltas) - quantidade_presencas
-
-
-if freq_aumento > 0:
-
-    print()
-    print("=" * 55)
-    print(f"      RELATÓRIO DE RECUPERAÇÃO: {nome_materia}")
-    print("=" * 55)
-    print()
-    
-    print(f"Frequência Atual: {frequencia:.1f}%")
-    print(f"Necessidade: Você precisa de {freq_aumento:.0f} aulas seguidas.")
-    print()
-    
-    print("-" * 55)
-    print("       VAMOS CALCULAR O TEMPO NECESSÁRIO")
-    print("-" * 55)
-    print()
-    
-    aulas_semanas = float(
-        input("Insira quantas aulas por semana você tem dessa matéria: ")
+try:
+    faltas_sistema = float(
+        input("Faltas exibidas no sistema: ").replace(",", ".")
     )
-    
-    print()
-    
-    semanas_necessarias = freq_aumento / aulas_semanas
-    meses_necessarios = semanas_necessarias / 4
-    
-    print("=" * 55)
-    print("       META PARA ATINGIR 75% DE PRESENÇA")
-    print("=" * 55)
-    print()
-    
-    print(f"Aulas presenciais necessárias: {freq_aumento:.0f}")
-    print(f"Semanas consecutivas: {semanas_necessarias:.1f}")
-    print(f"Meses de frequência perfeita: {meses_necessarios:.1f}")
-    
-    print()
-    print("-" * 55)
-    print("AVISO: Você NÃO pode faltar nenhuma vez")
-    print("durante esse período de recuperação!")
-    print("-" * 55)
+    frequencia = float(
+        input("Frequência atual (%): ").replace(",", ".")
+    )
 
+    if not nome_materia:
+        raise ValueError("O nome da matéria não pode ficar vazio.")
 
-else:
+    if faltas_sistema < 0:
+        raise ValueError("As faltas não podem ser negativas.")
+
+    if not 0 <= frequencia <= 100:
+        raise ValueError("A frequência deve estar entre 0 e 100.")
+
+    if faltas_sistema == 0 and frequencia < 100:
+        raise ValueError(
+            "Os dados são inconsistentes: há frequência abaixo de "
+            "100%, mas nenhuma falta informada."
+        )
 
     print()
     print("=" * 55)
-    print(f"           MATÉRIA: {nome_materia}")
+    print(f"       RELATÓRIO: {nome_materia.upper()}")
     print("=" * 55)
     print()
-    
-    print(f"Frequência Atual: {frequencia:.1f}%")
+    print(f"Frequência informada: {frequencia:.2f}%")
+
+    if frequencia >= FREQUENCIA_MINIMA:
+        print("Você já atingiu a frequência mínima de 75%.")
+        print("Continue frequentando as aulas para manter sua frequência.")
+
+    else:
+        faltas_aulas = faltas_sistema / FATOR_FALTA
+
+        proporcao_faltas = 1 - (frequencia / 100)
+
+        total_aulas_estimado = faltas_aulas / proporcao_faltas
+        presencas_estimadas = total_aulas_estimado - faltas_aulas
+
+        aulas_necessarias = math.ceil(
+            (FREQUENCIA_MINIMA / 100 * total_aulas_estimado
+             - presencas_estimadas)
+            / (1 - FREQUENCIA_MINIMA / 100)
+        )
+
+        aulas_necessarias = max(0, aulas_necessarias)
+
+        print(f"Faltas convertidas em aulas: {faltas_aulas:.2f}")
+        print(f"Total aproximado de aulas: {total_aulas_estimado:.2f}")
+        print()
+        print(f"Aulas consecutivas estimadas: {aulas_necessarias}")
+
+        print()
+        print("-" * 55)
+        print("       PROJEÇÃO DE TEMPO")
+        print("-" * 55)
+
+        aulas_semanais = float(
+            input("Quantas aulas por semana dessa matéria? ").replace(",", ".")
+        )
+
+        if aulas_semanais <= 0:
+            print("Erro: informe uma quantidade positiva de aulas semanais.")
+        else:
+            semanas = aulas_necessarias / aulas_semanais
+            meses = semanas / 4
+
+            print()
+            print(f"Aulas presenciais necessárias: {aulas_necessarias}")
+            print(f"Semanas estimadas: {semanas:.2f}")
+            print(f"Meses estimados: {meses:.2f}")
+
+            print()
+            print("-" * 55)
+            print("ATENÇÃO: projeção baseada em valores estimados.")
+            print("A frequência arredondada pode alterar o resultado.")
+            print("Considere nenhuma nova falta durante a recuperação.")
+            print("-" * 55)
+
+except ValueError as erro:
     print()
-    print("✓ Tudo certo!")
-    print("Você já está na zona segura (igual ou acima de 75%).")
-    print("Continue administrando suas presenças para não cair.")
-    print()
-    print("=" * 55)
+    print(f"Erro nos dados informados: {erro}")
